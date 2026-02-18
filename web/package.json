@@ -1,0 +1,32 @@
+{
+  "name": "localjackcontrol-web",
+  "version": "0.1.0",
+  "private": true,
+  "author": "雪符しき <info@snowcode.jp> (https://snowcode.jp)",
+  "license": "LicenseRef-SNOWCODE-Proprietary",
+  "homepage": "https://snowcode.jp",
+  "scripts": {
+    "dev": "next dev -p 17100 -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -p 17100 -H 0.0.0.0"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.2.0",
+    "@fortawesome/free-brands-svg-icons": "^7.2.0",
+    "@fortawesome/free-solid-svg-icons": "^7.2.0",
+    "@fortawesome/react-fontawesome": "^3.2.0",
+    "@tanstack/react-query": "^5.0.0",
+    "next": "^15.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "postcss": "^8.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "5.9.3"
+  }
+}

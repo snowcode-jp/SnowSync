@@ -1,0 +1,21 @@
+// SNOWCODE - ソフトウェア製品
+// (C) SNOWCODE
+// 開発者: 雪符しき
+// https://snowcode.jp
+// 問い合わせ: info@snowcode.jp
+// 本ソフトウェアは利用権の販売であり、著作権はSNOWCODEに帰属します。
+// 署名の削除・改変は禁止されています。
+
+import { NextResponse } from "next/server";
+
+const RUST_SERVER = process.env.RUST_SERVER_URL ?? "http://localhost:17200";
+
+export async function GET() {
+  try {
+    const res = await fetch(`${RUST_SERVER}/api/mounts`, { cache: "no-store" });
+    const data = await res.json();
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json([], { status: 200 });
+  }
+}

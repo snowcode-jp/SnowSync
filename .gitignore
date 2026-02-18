@@ -1,0 +1,34 @@
+# Rust
+/server/target/
+
+# Next.js
+/web/.next/
+/web/out/
+/web/node_modules/
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build
+/dist/
+
+# Claude Code (user-specific)
+.claude/
+
+# TLS certificates (auto-generated)
+**/ljc-certs/
