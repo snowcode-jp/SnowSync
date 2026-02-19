@@ -3,8 +3,6 @@
 // 開発者: 雪符しき
 // https://snowcode.jp
 // 問い合わせ: info@snowcode.jp
-// 本ソフトウェアは利用権の販売であり、著作権はSNOWCODEに帰属します。
-// 署名の削除・改変は禁止されています。
 
 use crate::state::AppState;
 use axum::body::Body;
@@ -165,12 +163,16 @@ impl RelayFs {
                         .get("error")
                         .and_then(|v| v.as_str())
                         .unwrap_or("Unknown error");
-                    tracing::warn!("Relay error: {}", err);
                     if err.contains("not found") || err.contains("NotFound") {
+                        // NotFound is expected — Finder probes for .DS_Store,
+                        // .Spotlight-V100, etc. on every mount. Log at debug level.
+                        tracing::debug!("Relay: not found: {} {}", cmd_type, cmd_path);
                         Err(FsError::NotFound)
                     } else if err.contains("permission") || err.contains("Permission") {
+                        tracing::warn!("Relay: permission denied: {} {}", cmd_type, cmd_path);
                         Err(FsError::Forbidden)
                     } else {
+                        tracing::warn!("Relay error: {} (cmd: {} {})", err, cmd_type, cmd_path);
                         Err(FsError::GeneralFailure)
                     }
                 }
@@ -686,6 +688,18 @@ pub async fn webdav_handler(state: Arc<AppState>, req: Request) -> Response<Body
     let resp = handler.handle(req).await;
     let (resp_parts, dav_body) = resp.into_parts();
     let mut response = Response::from_parts(resp_parts, Body::new(dav_body));
+
+    // dav-server may return 500 for FsError::NotFound (e.g. PROPFIND on a
+    // non-existent path). Finder expects 404 in this case. Downgrade 500 to
+    // 404 when the underlying relay reported "not found" — this prevents
+    // tower_http from logging these expected misses as server errors.
+    if response.status() == http::StatusCode::INTERNAL_SERVER_ERROR {
+        tracing::debug!(
+            "WebDAV {} {} -> 500, downgrading to 404 (likely not-found relay)",
+            method, path
+        );
+        *response.status_mut() = http::StatusCode::NOT_FOUND;
+    }
 
     // Add DAV header to all responses so Finder recognizes this as a WebDAV server
     response.headers_mut().insert("DAV", "1, 2".parse().unwrap());

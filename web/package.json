@@ -1,14 +1,14 @@
 {
-  "name": "localjackcontrol-web",
+  "name": "snowsync-web",
   "version": "0.1.0",
   "private": true,
   "author": "雪符しき <info@snowcode.jp> (https://snowcode.jp)",
   "license": "LicenseRef-SNOWCODE-Proprietary",
   "homepage": "https://snowcode.jp",
   "scripts": {
-    "dev": "next dev -p 17100 -H 0.0.0.0",
+    "dev": "next dev -p 17100 -H 127.0.0.1",
     "build": "next build",
-    "start": "next start -p 17100 -H 0.0.0.0"
+    "start": "next start -p 17100 -H 127.0.0.1"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.2.0",

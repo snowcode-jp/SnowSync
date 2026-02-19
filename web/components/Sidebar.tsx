@@ -3,8 +3,6 @@
 // 開発者: 雪符しき
 // https://snowcode.jp
 // 問い合わせ: info@snowcode.jp
-// 本ソフトウェアは利用権の販売であり、著作権はSNOWCODEに帰属します。
-// 署名の削除・改変は禁止されています。
 
 "use client";
 
@@ -78,7 +76,7 @@ export function Sidebar() {
           }}
         >
           <FontAwesomeIcon icon={faSnowflake} style={{ marginRight: 8 }} />
-          LocalJackControl
+          SnowSync
         </h1>
         <p
           style={{

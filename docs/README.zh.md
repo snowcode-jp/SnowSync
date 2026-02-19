@@ -142,10 +142,18 @@ bash scripts/dev.sh
 
 ### 3. 连接Windows PC
 
-1. 从Mac的Web UI `http://<Mac IP>:17100/connect` 下载连接用HTML
-2. 将HTML文件传输到Windows PC，用Chrome/Edge打开
-3. 点击"选择文件夹并连接"，选择要共享的文件夹
-4. 从Mac端的Web UI或Finder操作文件
+1. 在Windows PC上，用Chrome或Edge打开 `http://<Mac IP>:17200/`
+2. 从页面下载 **SnowSync-Connect.html**
+3. 用Chrome或Edge打开下载的HTML文件（通过 `file://` 协议打开）
+4. 确认IP地址已自动填写，点击「❄ 选择文件夹并连接」
+5. 选择要共享的文件夹 → Mac仪表板上将显示客户端
+6. 从Mac端的Web UI (`http://localhost:17100`) 或Finder操作文件
+
+> **为什么需要下载HTML？**
+> 文件操作使用的File System Access API出于安全原因仅在 `file://` 或 `https://` 下可用。
+> 直接通过 `http://` 打开无法选择文件夹。
+
+> **安全性**: 仪表板（端口17100）仅绑定到localhost，客户端PC无法访问。
 
 ## 环境变量
 
@@ -160,19 +168,11 @@ bash scripts/dev.sh
 
 ## 许可证
 
-```
-SNOWCODE - 软件产品
-(C) SNOWCODE
-开发者: 雪符しき
-https://snowcode.jp
-联系方式: info@snowcode.jp
-```
+[MIT License](../LICENSE) - (C) 2026 SNOWCODE / 雪符しき
 
-本软件以使用许可形式销售，著作权归SNOWCODE所有。
-禁止删除或修改版权声明。
+可自由使用、修改和再分发。详情请参阅 [LICENSE](../LICENSE)。
 
 ## 免责声明
 
-本软件按"原样"提供，不附带任何明示或暗示的保证。
-开发者对因使用本软件而产生的任何损害概不负责。
-用户应自行承担使用本软件的全部责任。
+本软件按"原样"提供，不附带任何保证。
+使用风险由用户自行承担，开发者概不负责。

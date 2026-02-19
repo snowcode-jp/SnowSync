@@ -3,8 +3,6 @@
 // 開発者: 雪符しき
 // https://snowcode.jp
 // 問い合わせ: info@snowcode.jp
-// 本ソフトウェアは利用権の販売であり、著作権はSNOWCODEに帰属します。
-// 署名の削除・改変は禁止されています。
 
 use crate::connect_html;
 use crate::mount;
@@ -18,14 +16,16 @@ use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use axum::Router;
 use std::sync::Arc;
+use tower_http::classify::{ServerErrorsAsFailures, SharedClassifier};
 use tower_http::cors::CorsLayer;
-use tower_http::trace::TraceLayer;
+use tower_http::trace::{self, TraceLayer};
 
 pub fn build_router(state: Arc<AppState>) -> Router {
     let webdav_state = state.clone();
 
     // API routes get CORS support
     let api_routes = Router::new()
+        .route("/", get(connect_html::download_page))
         .route("/ws", get(ws_upgrade))
         .route("/api/clients", get(relay::list_clients))
         .route("/api/relay/{client_id}", post(relay::relay_command))
@@ -34,6 +34,13 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/api/unmount", post(mount::unmount_webdav))
         .route("/api/mounts", get(mount::list_mounts))
         .layer(CorsLayer::permissive());
+
+    // Custom TraceLayer: downgrade WebDAV failures from ERROR to DEBUG.
+    // Finder probes for many non-existent files (.DS_Store, .Spotlight-V100, etc.)
+    // on mount, which produces 404/500 via the relay — these are expected and
+    // should not clutter the log as ERROR.
+    let trace_layer = TraceLayer::new(SharedClassifier::new(ServerErrorsAsFailures::default()))
+        .on_failure(trace::DefaultOnFailure::new().level(tracing::Level::DEBUG));
 
     // WebDAV routes: NO CorsLayer — Finder needs raw DAV responses
     // with proper DAV headers, not CORS-intercepted OPTIONS.
@@ -53,7 +60,7 @@ pub fn build_router(state: Arc<AppState>) -> Router {
                 }
             }
         })
-        .layer(TraceLayer::new_for_http())
+        .layer(trace_layer)
         .with_state(state)
 }
 

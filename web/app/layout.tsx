@@ -3,8 +3,6 @@
 // 開発者: 雪符しき
 // https://snowcode.jp
 // 問い合わせ: info@snowcode.jp
-// 本ソフトウェアは利用権の販売であり、著作権はSNOWCODEに帰属します。
-// 署名の削除・改変は禁止されています。
 
 import type { Metadata } from "next";
 import "./globals.css";
@@ -16,7 +14,7 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 config.autoAddCss = false;
 
 export const metadata: Metadata = {
-  title: "LocalJackControl",
+  title: "SnowSync",
   description: "Windows PCのフォルダをMacからリモート操作",
 };
 

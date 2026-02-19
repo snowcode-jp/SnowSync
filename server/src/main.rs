@@ -3,8 +3,6 @@
 // 開発者: 雪符しき
 // https://snowcode.jp
 // 問い合わせ: info@snowcode.jp
-// 本ソフトウェアは利用権の販売であり、著作権はSNOWCODEに帰属します。
-// 署名の削除・改変は禁止されています。
 
 mod config;
 mod connect_html;
@@ -47,7 +45,7 @@ async fn main() -> Result<()> {
     let http_listener = TcpListener::bind(&http_addr).await?;
 
     tracing::info!("===========================================");
-    tracing::info!("  LocalJackControl Relay Server");
+    tracing::info!("  SnowSync Relay Server");
     tracing::info!("===========================================");
     tracing::info!("  WebSocket: ws://{}:{}/ws", local_ip, port);
     tracing::info!("  API:       http://{}:{}/api/", local_ip, port);

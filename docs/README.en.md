@@ -142,10 +142,18 @@ The following services will start:
 
 ### 3. Connect a Windows PC
 
-1. Download the connection HTML from Mac's Web UI at `http://<Mac IP>:17100/connect`
-2. Transfer the HTML file to the Windows PC and open it in Chrome/Edge
-3. Click "Select folder and connect" to choose a folder to share
-4. Manage files from the Mac via the Web UI or Finder
+1. On the Windows PC, open Chrome or Edge and navigate to `http://<Mac IP>:17200/`
+2. Download **SnowSync-Connect.html** from the landing page
+3. Open the downloaded HTML file in Chrome or Edge (it will open via `file://` protocol)
+4. Confirm the IP address is pre-filled, then click "❄ Select folder and connect"
+5. Choose a folder to share → the client will appear on the Mac dashboard
+6. Manage files from the Mac's Web UI (`http://localhost:17100`) or Finder
+
+> **Why is the HTML download required?**
+> The File System Access API used for file operations only works under `file://` or `https://` for security reasons.
+> Opening the page directly via `http://` will not allow folder selection.
+
+> **Security**: The dashboard (port 17100) is bound to localhost only and cannot be accessed from client PCs.
 
 ## Environment Variables
 
@@ -160,19 +168,11 @@ Copy `.env.example` to `.env` to customize. Default values are used when not set
 
 ## License
 
-```
-SNOWCODE - Software Product
-(C) SNOWCODE
-Developer: Yukifu Shiki
-https://snowcode.jp
-Contact: info@snowcode.jp
-```
+[MIT License](../LICENSE) - (C) 2026 SNOWCODE / Yukifu Shiki
 
-This software is sold as a license to use. All copyrights belong to SNOWCODE.
-Removal or modification of the copyright notice is prohibited.
+Free to use, modify, and redistribute. See [LICENSE](../LICENSE) for details.
 
 ## Disclaimer
 
-This software is provided "as is" without warranty of any kind, express or implied.
-The developer shall not be liable for any damages arising from the use of this software.
-Users assume all responsibility for the use of this software.
+This software is provided "as is" without warranty of any kind.
+Use at your own risk. The developer assumes no liability.
