@@ -166,6 +166,21 @@ bash scripts/dev.sh
 | `LJC_BIND` | 0.0.0.0 | バインドアドレス |
 | `RUST_SERVER_URL` | http://localhost:17200 | Next.jsからRustサーバーへの接続先 |
 
+
+## 画面
+### サーバー
+<img width="1917" height="908" alt="スクリーンショット 2026-02-19 1 06 17" src="https://github.com/user-attachments/assets/1512d77d-70c0-4065-93a0-b4a3392cfa23" />
+
+<img width="1917" height="908" alt="スクリーンショット 2026-02-19 1 08 57" src="https://github.com/user-attachments/assets/dbf49c0f-2d54-4e12-a489-84212ef65bcb" />
+
+### クライアント
+
+<img width="1917" height="908" alt="スクリーンショット 2026-02-19 1 06 51" src="https://github.com/user-attachments/assets/081dc78b-7050-46e8-8279-655965ad98d1" />
+
+<img width="1917" height="908" alt="スクリーンショット 2026-02-19 1 08 42" src="https://github.com/user-attachments/assets/3809d942-161f-4b37-a935-57eec6d60b74" />
+
+
+
 ## ライセンス
 
 [MIT License](LICENSE) - (C) 2026 SNOWCODE / 雪符しき
