@@ -14,6 +14,12 @@ use std::sync::Arc;
 fn cert_dir() -> PathBuf {
     let dir = dirs_or_home().join(".ljc-certs");
     let _ = std::fs::create_dir_all(&dir);
+    // Restrict directory permissions to owner only (rwx------)
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o700));
+    }
     dir
 }
 
@@ -48,6 +54,12 @@ pub fn make_tls_config(local_ip: &str) -> anyhow::Result<Arc<ServerConfig>> {
         std::fs::write(&cert_path, &cert)?;
         std::fs::write(&key_path, &key)?;
         std::fs::write(&ip_marker_path, local_ip)?;
+        // Restrict private key file permissions (rw-------)
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&key_path, std::fs::Permissions::from_mode(0o600));
+        }
         (cert, key)
     };
 

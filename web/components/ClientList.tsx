@@ -20,6 +20,7 @@ import {
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { useToast } from "@/components/Toast";
+import { useAuth } from "@/components/AuthProvider";
 
 interface MountInfo {
   url: string;
@@ -34,15 +35,16 @@ export function ClientList() {
   const [mounting, setMounting] = useState<Record<string, boolean>>({});
   const [mounts, setMounts] = useState<MountInfo[]>([]);
   const { showToast } = useToast();
+  const { authHeaders } = useAuth();
 
   const fetchClients = useCallback(async () => {
-    const res = await fetch("/api/clients");
+    const res = await fetch("/api/clients", { headers: authHeaders() });
     if (res.ok) setClients(await res.json());
   }, []);
 
   const fetchMounts = useCallback(async () => {
     try {
-      const res = await fetch("/api/mounts");
+      const res = await fetch("/api/mounts", { headers: authHeaders() });
       if (res.ok) setMounts(await res.json());
     } catch {
       // ignore
@@ -74,7 +76,7 @@ export function ClientList() {
     try {
       const res = await fetch("/api/mount", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({ client_id: clientId, mount_path: mountPath }),
       });
       const data = await res.json();
@@ -98,7 +100,7 @@ export function ClientList() {
     try {
       const res = await fetch("/api/unmount", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({ mount_path: mp }),
       });
       const data = await res.json();

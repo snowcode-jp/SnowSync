@@ -33,6 +33,15 @@ pub async fn handle_ws(socket: WebSocket, state: Arc<AppState>) {
         }
     };
 
+    // Validate token from registration message
+    let token = registration["token"]
+        .as_str()
+        .unwrap_or("");
+    if token != state.api_token {
+        tracing::warn!("WebSocket registration rejected: invalid token");
+        return;
+    }
+
     let client_id = uuid::Uuid::new_v4().to_string();
     let name = registration["name"]
         .as_str()

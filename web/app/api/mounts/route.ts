@@ -4,13 +4,17 @@
 // https://snowcode.jp
 // 問い合わせ: info@snowcode.jp
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const RUST_SERVER = process.env.RUST_SERVER_URL ?? "http://localhost:17200";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get("Authorization") || "";
   try {
-    const res = await fetch(`${RUST_SERVER}/api/mounts`, { cache: "no-store" });
+    const res = await fetch(`${RUST_SERVER}/api/mounts`, {
+      cache: "no-store",
+      headers: { Authorization: authHeader },
+    });
     const data = await res.json();
     return NextResponse.json(data);
   } catch {

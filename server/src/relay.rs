@@ -23,6 +23,21 @@ pub async fn relay_command(
     Path(client_id): Path<String>,
     Json(mut body): Json<Value>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    // Validate command type whitelist
+    let cmd_type = body
+        .get("type")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+    const ALLOWED_TYPES: &[&str] = &[
+        "readdir", "readFile", "writeFile", "stat", "mkdir", "delete", "rename",
+    ];
+    if !ALLOWED_TYPES.contains(&cmd_type) {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": format!("Command type '{}' not allowed", cmd_type)})),
+        ));
+    }
+
     // Generate request ID
     let request_id = uuid::Uuid::new_v4().to_string();
     body["id"] = json!(request_id);

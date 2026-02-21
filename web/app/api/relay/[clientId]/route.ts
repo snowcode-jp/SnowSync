@@ -12,13 +12,14 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ clientId: string }> }
 ) {
+  const authHeader = request.headers.get("Authorization") || "";
   const { clientId } = await params;
   const body = await request.json();
 
   try {
     const res = await fetch(`${RUST_SERVER}/api/relay/${clientId}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: authHeader },
       body: JSON.stringify(body),
     });
 

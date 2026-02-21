@@ -12,7 +12,9 @@ use crate::webdav_bridge;
 use crate::ws;
 use axum::extract::ws::WebSocketUpgrade;
 use axum::extract::{Request, State};
-use axum::response::IntoResponse;
+use axum::http::{header, HeaderValue, Method, StatusCode};
+use axum::middleware::{self, Next};
+use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::Router;
 use std::sync::Arc;
@@ -20,20 +22,62 @@ use tower_http::classify::{ServerErrorsAsFailures, SharedClassifier};
 use tower_http::cors::CorsLayer;
 use tower_http::trace::{self, TraceLayer};
 
+/// Authentication middleware: validates Bearer token on protected routes.
+async fn auth_middleware(
+    State(state): State<Arc<AppState>>,
+    req: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    let token = req
+        .headers()
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer "))
+        .unwrap_or("");
+
+    if token != state.api_token {
+        tracing::warn!(
+            "Auth rejected: {} {} (invalid token)",
+            req.method(),
+            req.uri().path()
+        );
+        return Err(StatusCode::UNAUTHORIZED);
+    }
+
+    Ok(next.run(req).await)
+}
+
 pub fn build_router(state: Arc<AppState>) -> Router {
     let webdav_state = state.clone();
 
-    // API routes get CORS support
-    let api_routes = Router::new()
+    // CORS: allow localhost + LAN origins (not fully permissive)
+    let cors = CorsLayer::new()
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION])
+        .allow_origin([
+            "http://localhost:17100".parse::<HeaderValue>().unwrap(),
+            "http://127.0.0.1:17100".parse::<HeaderValue>().unwrap(),
+        ]);
+
+    // Public routes (no auth required)
+    let public_routes = Router::new()
         .route("/", get(connect_html::download_page))
         .route("/ws", get(ws_upgrade))
+        .route("/api/connect-html", get(connect_html::connect_html));
+
+    // Protected routes (require Bearer token)
+    let protected_routes = Router::new()
         .route("/api/clients", get(relay::list_clients))
         .route("/api/relay/{client_id}", post(relay::relay_command))
-        .route("/api/connect-html", get(connect_html::connect_html))
         .route("/api/mount", post(mount::mount_webdav))
         .route("/api/unmount", post(mount::unmount_webdav))
         .route("/api/mounts", get(mount::list_mounts))
-        .layer(CorsLayer::permissive());
+        .layer(middleware::from_fn_with_state(state.clone(), auth_middleware));
+
+    let api_routes = Router::new()
+        .merge(public_routes)
+        .merge(protected_routes)
+        .layer(cors);
 
     // Custom TraceLayer: downgrade WebDAV failures from ERROR to DEBUG.
     // Finder probes for many non-existent files (.DS_Store, .Spotlight-V100, etc.)
