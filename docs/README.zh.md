@@ -1,178 +1,127 @@
 # SnowSync
 
-**[日本語](../README.md)** | **[English](README.en.md)** | **[中文](#概述)**
+**[日本語](../README.md)** | **[English](README.en.md)** | **[中文](#)**
+
+### 从 Mac 直接访问 Windows 文件 — 局域网内即时同步
+
+无需云端、无需U盘、无需第三方账号。只需在 Windows 上打开一个文件夹，它就会出现在 Mac 的 Finder 中。
+
+| 登录 | 控制面板 |
+|:---:|:---:|
+| ![登录](assets/01_auth.png) | ![控制面板](assets/02_dashboard.png) |
+
+| 连接 | 文件浏览器 |
+|:---:|:---:|
+| ![连接](assets/03_connect.png) | ![文件浏览器](assets/04_browse.png) |
 
 ---
 
-从Mac挂载和操作多台Windows PC存储的远程文件共享系统
+## 问题
 
-## 概述
+你同时使用 Mac 和 Windows，需要从 Windows 取一个文件，但是：
+- 云同步速度慢，占用存储空间
+- U盘需要来回跑
+- 网络共享（SMB）在 Mac 和 Windows 之间不稳定
+- 现有工具需要复杂配置或付费
 
-SnowSync是一个通过WebDAV将局域网内Windows PC的共享文件夹挂载到Mac上，并可通过macOS Finder或Web浏览器进行文件操作的系统。
+## 解决方案
 
-- 通过WebSocket中继实现实时双向通信
-- 在macOS Finder中挂载WebDAV（loopback HTTP / HTTPS自动切换）
-- 基于Web的文件浏览器（上传、下载、重命名、删除）
-- 支持多台Windows PC同时连接
-- 自动生成自签名TLS证书
-- Toast通知系统（成功、错误、警告、信息）
+SnowSync 只需3步，就能将任何 Windows 文件夹变成 Mac 上的本地驱动器。
 
-## 技术栈
+1. 在 Mac 上运行 SnowSync
+2. 在 Windows 上打开一个网页
+3. 选择要共享的文件夹
 
-| 类别 | 技术 | 版本 |
-|------|------|------|
-| 服务端语言 | Rust | Edition 2021 |
-| Web框架 | Axum | 0.8 |
-| 异步运行时 | Tokio | 1.x |
-| WebDAV服务器 | dav-server | 0.8 |
-| TLS | rustls + rcgen | 0.23 / 0.13 |
-| HTTP/2 | hyper + hyper-util | 1.x / 0.1 |
-| 前端框架 | Next.js (App Router) | 15.3+ |
-| UI库 | React | 19.0+ |
-| 类型系统 | TypeScript | 5.7+ |
-| CSS | Tailwind CSS + 自定义CSS | 4.x |
-| 图标 | Font Awesome (react) | 6.x |
-| 字体 | Zen Maru Gothic | - |
-| 运行时 | Node.js | 20.x |
+完成。文件夹会出现在 Finder 中。浏览、编辑、复制 — 就像本地驱动器一样。
 
-## 架构
+---
 
-```
-  Windows PC (Chrome/Edge)              Mac（服务端）
-  ┌─────────────────────┐     ┌────────────────────────────────┐
-  │  ljc-connect.html   │     │  Rust中继服务器 (:17200)        │
-  │  (File System       │◄───►│  ├─ WebSocket /ws              │
-  │   Access API)       │ WS  │  ├─ REST API /api/*            │
-  │                     │     │  ├─ WebDAV /webdav/<id>/       │
-  └─────────────────────┘     │  └─ HTTPS (:17201)             │
-                              │                                │
-                              │  Next.js Web UI (:17100)       │
-                              │  ├─ 仪表盘 /                    │
-                              │  ├─ 文件浏览 /browse            │
-                              │  └─ 连接指南 /connect           │
-                              │                                │
-                              │  macOS Finder                  │
-                              │  └─ WebDAV挂载                  │
-                              └────────────────────────────────┘
-```
+## 功能
 
-## 源码结构
+**日常使用：**
+- 在 macOS Finder 中直接挂载 Windows 文件夹
+- 通过浏览器浏览、上传、下载、重命名和删除文件
+- 同时连接多台 Windows PC
+- 完全在局域网内运行 — 数据不会离开你的网络
 
-```
-SnowSync/
-├── .env.example                  # 环境变量模板
-├── .gitignore
-├── README.md                     # 日本语（主文档）
-├── docs/
-│   ├── README.en.md              # English
-│   └── README.zh.md              # 中文（本文件）
-├── scripts/
-│   └── dev.sh                    # 开发启动脚本（同时启动Rust + Next.js）
-├── server/                       # Rust中继服务器
-│   ├── Cargo.toml
-│   ├── Cargo.lock
-│   └── src/
-│       ├── main.rs               # 入口：HTTP + HTTPS双服务器
-│       ├── config.rs             # 配置管理（环境变量：LJC_PORT, LJC_BIND）
-│       ├── server.rs             # Axum路由（API / WebSocket / WebDAV）
-│       ├── state.rs              # 应用状态：客户端连接管理
-│       ├── ws.rs                 # WebSocket：客户端注册与命令中继
-│       ├── relay.rs              # REST API：客户端列表与命令转发
-│       ├── webdav_bridge.rs      # WebDAV↔WebSocket桥接（RelayFs虚拟FS）
-│       ├── mount.rs              # WebDAV挂载/卸载（3级回退策略）
-│       ├── tls.rs                # 自签名TLS证书生成与缓存
-│       └── connect_html.rs       # Windows客户端连接HTML动态生成
-└── web/                          # Next.js前端
-    ├── package.json
-    ├── tsconfig.json
-    ├── next.config.ts
-    ├── postcss.config.mjs
-    ├── app/
-    │   ├── layout.tsx            # 根布局（侧边栏 + Providers）
-    │   ├── globals.css           # 雪花结晶主题CSS
-    │   ├── page.tsx              # 仪表盘：统计、客户端列表
-    │   ├── browse/page.tsx       # 文件浏览：远程文件操作
-    │   ├── connect/page.tsx      # 连接指南：HTML下载
-    │   └── api/                  # Next.js API路由（代理到Rust）
-    │       ├── clients/route.ts
-    │       ├── mount/route.ts
-    │       ├── unmount/route.ts
-    │       ├── mounts/route.ts
-    │       ├── connect-html/route.ts
-    │       └── relay/[clientId]/route.ts
-    ├── components/
-    │   ├── Sidebar.tsx           # 侧边栏导航
-    │   ├── ServerStatus.tsx      # 服务器信息统计卡片
-    │   ├── ClientList.tsx        # 已连接客户端列表
-    │   ├── RemoteBrowser.tsx     # 远程文件浏览器
-    │   ├── MountInstructions.tsx # 挂载说明指南
-    │   ├── Toast.tsx             # Toast通知（Context + Hook）
-    │   └── Providers.tsx         # 客户端组件包装器
-    └── lib/
-        └── types.ts              # TypeScript类型定义
-```
+**技术特性：**
+- Mac 和 Windows 之间的实时 WebSocket 中继
+- WebDAV 挂载，自动 HTTP/HTTPS 切换
+- 自动生成自签名 TLS 证书
+- 基于令牌的 API 认证
+- 使用 Rust（服务端）和 Next.js（控制面板）构建
 
-## 系统要求
+---
 
-- **Mac（服务端）**: macOS 13+, Rust 1.70+ (cargo), Node.js 20+ (npm/npx)
-- **Windows（客户端）**: Chrome 86+ 或 Edge 86+（支持File System Access API）
+## 快速开始
 
-## 启动步骤
+### 系统要求
+- **Mac**: macOS 13+, [Rust](https://rustup.rs/), [Node.js](https://nodejs.org/) 20+
+- **Windows**: Chrome 86+ 或 Edge 86+
 
-### 1. 安装依赖
+### 安装
 
 ```bash
-cd web && npm install && cd ..
-```
+# 克隆并安装
+git clone https://github.com/snowcode-jp/SnowSync.git
+cd SnowSync && cd web && npm install && cd ..
 
-### 2. 启动开发服务器
-
-```bash
+# 启动 SnowSync
 bash scripts/dev.sh
 ```
 
-以下服务将启动：
+启动时终端会显示 **API Token**：
 
-| 服务 | URL |
-|------|-----|
-| Web UI | http://localhost:17100 |
-| WebSocket中继 | ws://localhost:17200/ws |
-| WebDAV (HTTP) | http://localhost:17200/webdav/\<client_id\>/ |
-| WebDAV (HTTPS) | https://localhost:17201/webdav/\<client_id\>/ |
+```
+  API Token: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
 
-### 3. 连接Windows PC
+复制此令牌 — 登录控制面板时需要使用。
 
-1. 在Windows PC上，用Chrome或Edge打开 `http://<Mac IP>:17200/`
-2. 从页面下载 **SnowSync-Connect.html**
-3. 用Chrome或Edge打开下载的HTML文件（通过 `file://` 协议打开）
-4. 确认IP地址已自动填写，点击「❄ 选择文件夹并连接」
-5. 选择要共享的文件夹 → Mac仪表板上将显示客户端
-6. 从Mac端的Web UI (`http://localhost:17100`) 或Finder操作文件
+### 登录控制面板
 
-> **为什么需要下载HTML？**
-> 文件操作使用的File System Access API出于安全原因仅在 `file://` 或 `https://` 下可用。
-> 直接通过 `http://` 打开无法选择文件夹。
+1. 在浏览器中打开 `http://localhost:17100`
+2. 粘贴终端中显示的 API Token
+3. 点击 **Connect**
 
-> **安全性**: 仪表板（端口17100）仅绑定到localhost，客户端PC无法访问。
+### 连接 Windows PC
 
-## 环境变量
+1. 在 Windows 上打开 Chrome/Edge，访问 `http://<Mac的IP>:17200`
+2. 下载并打开连接文件
+3. 选择要共享的文件夹 — 完成！
 
-将 `.env.example` 复制为 `.env` 进行自定义配置。未设置时使用默认值。
+文件现在可以从 Mac 的 Finder 和 Web 控制面板访问。
 
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `WEB_PORT` | 17100 | Next.js Web UI端口 |
-| `LJC_PORT` | 17200 | Rust中继服务器端口（HTTPS = +1） |
-| `LJC_BIND` | 0.0.0.0 | 绑定地址 |
-| `RUST_SERVER_URL` | http://localhost:17200 | Next.js连接Rust服务器的地址 |
+---
+
+## 工作原理
+
+```
+  Windows PC                          Mac
+  ┌──────────────┐          ┌─────────────────────┐
+  │ 在浏览器中    │  ◄─────► │  SnowSync 服务器     │
+  │ 选择文件夹    │ WebSocket│  ┌─ Finder (WebDAV)  │
+  └──────────────┘          │  └─ Web 控制面板      │
+                            └─────────────────────┘
+                你的局域网 — 数据不会上传到互联网
+```
+
+## 安全性
+
+- 自动生成令牌的 API 认证
+- 挂载路径限制在 `~/Public/mount`
+- 命令白名单防止未授权操作
+- CORS 锁定为 localhost
+- WebDAV 连接的 TLS 加密
+
+---
 
 ## 许可证
 
-[MIT License](../LICENSE) - (C) 2026 SNOWCODE / 雪符しき
+[MIT License](../LICENSE) - (C) 2026 SNOWCODE / Yukifu Shiki
 
-可自由使用、修改和再分发。详情请参阅 [LICENSE](../LICENSE)。
+可自由使用、修改和再分发。
 
 ## 免责声明
 
-本软件按"原样"提供，不附带任何保证。
-使用风险由用户自行承担，开发者概不负责。
+本软件按"原样"提供，不附带任何保证。使用风险由用户自行承担。

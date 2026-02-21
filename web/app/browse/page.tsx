@@ -48,11 +48,11 @@ function BrowseContent() {
           <h1 className="page-title">
             <FontAwesomeIcon icon={faSnowflake} style={{ color: "#7eb8d8", fontSize: 22 }} />
             <FontAwesomeIcon icon={faFolderOpen} style={{ color: "#7eb8d8", fontSize: 22 }} />
-            リモートファイルブラウザ
+            Remote File Browser
           </h1>
           {selectedClient && (
             <p style={{ fontSize: 13, color: "#7eb8d8", fontWeight: 500 }}>
-              閲覧中: {selectedClient.folder_name} ({selectedClient.name})
+              Viewing: {selectedClient.folder_name} ({selectedClient.name})
             </p>
           )}
         </div>
@@ -81,7 +81,7 @@ function BrowseContent() {
             style={{ fontSize: 32, color: "rgba(126, 184, 216, 0.4)", marginBottom: 12 }}
           />
           <p style={{ color: "#4a7c9b" }}>
-            接続中のクライアントがありません。Windows PCで接続用HTMLを開いてフォルダを共有してください。
+            No connected clients. Open the connection HTML on a Windows PC to share a folder.
           </p>
         </div>
       )}
@@ -95,7 +95,7 @@ export default function BrowsePage() {
       fallback={
         <div style={{ padding: 30, color: "#7eb8d8" }}>
           <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: 8 }} />
-          読み込み中...
+          Loading...
         </div>
       }
     >

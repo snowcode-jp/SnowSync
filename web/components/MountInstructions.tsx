@@ -28,31 +28,31 @@ export function ConnectionGuide() {
   const steps = [
     {
       icon: faWindows,
-      title: "Windows PC (フォルダを共有)",
+      title: "Windows PC (Share Folders)",
       items: [
-        "「接続」ページから接続用HTMLをダウンロード",
-        "Windows PCにHTMLファイルをコピー",
-        "Chrome / Edgeでそのファイルを開く",
-        "「フォルダを選択して接続」をクリック",
-        "ブラウザタブは開いたままにする",
+        "Download the connection HTML from the Connect page",
+        "Copy the HTML file to your Windows PC",
+        "Open it in Chrome / Edge",
+        "Click \"Select folder to connect\"",
+        "Keep the browser tab open",
       ],
     },
     {
       icon: faGlobe,
-      title: "Mac (ブラウザでファイル操作)",
+      title: "Mac (Browse Files in Browser)",
       items: [
-        "「ファイル閲覧」またはクライアント一覧から「閲覧」",
-        "接続中のクライアントを選択",
-        "閲覧・ダウンロード・アップロード・削除・リネーム可能",
+        "Go to File Browser or click Browse from the client list",
+        "Select a connected client",
+        "Browse, download, upload, delete, and rename files",
       ],
     },
     {
       icon: faHardDrive,
       title: "Mac (Finder / VSCode / Zed)",
       items: [
-        "クライアント一覧の「Finderで開く」をクリック",
-        "HTTPS (自己署名証明書) でFinderにマウントされます",
-        "マウント先のフォルダをVSCode/Zedで開く",
+        "Click \"Open in Finder\" from the client list",
+        "Mounts via HTTPS (self-signed certificate) in Finder",
+        "Open the mounted folder in VSCode/Zed",
       ],
     },
   ];
@@ -62,7 +62,7 @@ export function ConnectionGuide() {
       <div className="card-header">
         <div className="card-title">
           <FontAwesomeIcon icon={faListCheck} />
-          接続方法
+          Connection Guide
         </div>
       </div>
 
@@ -116,10 +116,10 @@ export function ConnectionGuide() {
         ))}
       </div>
 
-      {/* 注意 */}
+      {/* Note */}
       <div className="alert alert-warning" style={{ marginTop: 20, marginBottom: 0 }}>
         <FontAwesomeIcon icon={faTriangleExclamation} />
-        <span>Windows 2台以上の同時接続に対応。各PCでHTMLを開いてフォルダを共有してください。</span>
+        <span>Supports multiple Windows PCs simultaneously. Open the HTML file on each PC to share folders.</span>
       </div>
     </div>
   );

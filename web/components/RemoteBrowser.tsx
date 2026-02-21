@@ -43,7 +43,7 @@ function formatSize(bytes: number): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("ja-JP", {
+  return new Date(iso).toLocaleString("en-US", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -59,7 +59,7 @@ async function relayCommand(clientId: string, cmd: Record<string, unknown>, auth
     body: JSON.stringify(cmd),
   });
   const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "操作に失敗しました");
+  if (!data.ok) throw new Error(data.error || "Operation failed");
   return data.data;
 }
 
@@ -84,7 +84,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
       }, authHeaders);
       setFiles(data as FileEntry[]);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "読み込みに失敗しました");
+      setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
   };
 
   const handleDownload = async (fileName: string) => {
-    setActionMsg(`${fileName} をダウンロード中...`);
+    setActionMsg(`Downloading ${fileName}...`);
     try {
       const filePath = [...currentPath, fileName].join("/");
       const result = (await relayCommand(clientId, {
@@ -126,10 +126,10 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
       a.click();
       URL.revokeObjectURL(url);
       setActionMsg(null);
-      showToast("success", `${fileName} をダウンロードしました`);
+      showToast("success", `Downloaded ${fileName}`);
     } catch (err: unknown) {
       setActionMsg(null);
-      showToast("error", `ダウンロード失敗: ${err instanceof Error ? err.message : "エラー"}`);
+      showToast("error", `Download failed: ${err instanceof Error ? err.message : "Error"}`);
     }
   };
 
@@ -140,7 +140,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
     input.onchange = async () => {
       if (!input.files) return;
       for (const file of Array.from(input.files)) {
-        setActionMsg(`${file.name} をアップロード中...`);
+        setActionMsg(`Uploading ${file.name}...`);
         try {
           const buffer = await file.arrayBuffer();
           const bytes = new Uint8Array(buffer);
@@ -156,19 +156,19 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
           }, authHeaders);
         } catch (err: unknown) {
           setActionMsg(null);
-          showToast("error", `アップロード失敗: ${err instanceof Error ? err.message : "エラー"}`);
+          showToast("error", `Upload failed: ${err instanceof Error ? err.message : "Error"}`);
           return;
         }
       }
       setActionMsg(null);
-      showToast("success", "アップロードが完了しました");
+      showToast("success", "Upload complete");
       fetchFiles();
     };
     input.click();
   };
 
   const handleNewFolder = async () => {
-    const name = prompt("新しいフォルダ名:");
+    const name = prompt("New folder name:");
     if (!name) return;
     try {
       const folderPath = [...currentPath, name].join("/");
@@ -176,30 +176,30 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
         type: "mkdir",
         path: "/" + folderPath,
       }, authHeaders);
-      showToast("success", `フォルダ「${name}」を作成しました`);
+      showToast("success", `Created folder "${name}"`);
       fetchFiles();
     } catch (err: unknown) {
-      showToast("error", `フォルダ作成失敗: ${err instanceof Error ? err.message : "エラー"}`);
+      showToast("error", `Failed to create folder: ${err instanceof Error ? err.message : "Error"}`);
     }
   };
 
   const handleDelete = async (name: string, isDir: boolean) => {
-    if (!confirm(`${isDir ? "フォルダ" : "ファイル"}「${name}」を削除しますか?`)) return;
+    if (!confirm(`Delete ${isDir ? "folder" : "file"} "${name}"?`)) return;
     try {
       const targetPath = [...currentPath, name].join("/");
       await relayCommand(clientId, {
         type: "delete",
         path: "/" + targetPath,
       }, authHeaders);
-      showToast("success", `「${name}」を削除しました`);
+      showToast("success", `Deleted "${name}"`);
       fetchFiles();
     } catch (err: unknown) {
-      showToast("error", `削除失敗: ${err instanceof Error ? err.message : "エラー"}`);
+      showToast("error", `Delete failed: ${err instanceof Error ? err.message : "Error"}`);
     }
   };
 
   const handleRename = async (oldName: string) => {
-    const newName = prompt("新しい名前:", oldName);
+    const newName = prompt("New name:", oldName);
     if (!newName || newName === oldName) return;
     try {
       const oldPath = "/" + [...currentPath, oldName].join("/");
@@ -209,10 +209,10 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
         oldPath,
         newPath,
       }, authHeaders);
-      showToast("success", `「${oldName}」→「${newName}」にリネームしました`);
+      showToast("success", `Renamed "${oldName}" to "${newName}"`);
       fetchFiles();
     } catch (err: unknown) {
-      showToast("error", `リネーム失敗: ${err instanceof Error ? err.message : "エラー"}`);
+      showToast("error", `Rename failed: ${err instanceof Error ? err.message : "Error"}`);
     }
   };
 
@@ -260,15 +260,15 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={handleUpload} className="btn btn-sm">
             <FontAwesomeIcon icon={faCloudArrowUp} />
-            アップロード
+            Upload
           </button>
           <button onClick={handleNewFolder} className="btn btn-sm btn-secondary">
             <FontAwesomeIcon icon={faFolderPlus} />
-            新規フォルダ
+            New Folder
           </button>
           <button onClick={fetchFiles} className="btn btn-sm btn-secondary">
             <FontAwesomeIcon icon={faArrowsRotate} />
-            更新
+            Refresh
           </button>
         </div>
       </div>
@@ -285,7 +285,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
       {loading ? (
         <div style={{ padding: 40, textAlign: "center", color: "#7eb8d8" }}>
           <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: 8 }} />
-          読み込み中...
+          Loading...
         </div>
       ) : error ? (
         <div style={{ padding: 40, textAlign: "center" }}>
@@ -295,17 +295,17 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
       ) : files.length === 0 ? (
         <div style={{ padding: 40, textAlign: "center" }}>
           <FontAwesomeIcon icon={faFolderOpen} style={{ color: "rgba(126, 184, 216, 0.4)", fontSize: 24, marginBottom: 8, display: "block" }} />
-          <p style={{ color: "#7eb8d8" }}>空のディレクトリ</p>
+          <p style={{ color: "#7eb8d8" }}>Empty directory</p>
         </div>
       ) : (
         <div className="table-wrapper">
           <table className="table">
             <thead>
               <tr>
-                <th>名前</th>
-                <th style={{ textAlign: "right" }}>サイズ</th>
-                <th style={{ textAlign: "right" }}>更新日時</th>
-                <th style={{ textAlign: "right" }}>操作</th>
+                <th>Name</th>
+                <th style={{ textAlign: "right" }}>Size</th>
+                <th style={{ textAlign: "right" }}>Modified</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -371,7 +371,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
                         style={{ padding: "5px 12px", fontSize: 11 }}
                       >
                         <FontAwesomeIcon icon={faPenToSquare} />
-                        リネーム
+                        Rename
                       </button>
                       <button
                         onClick={() => handleDelete(file.name, file.is_dir)}
@@ -379,7 +379,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
                         style={{ padding: "5px 12px", fontSize: 11 }}
                       >
                         <FontAwesomeIcon icon={faTrash} />
-                        削除
+                        Delete
                       </button>
                     </div>
                   </td>
