@@ -10,7 +10,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["雪符しき <info@snowcode.jp>"]
 homepage = "https://snowcode.jp"
-license = "LicenseRef-SNOWCODE-Proprietary"
+license = "MIT"
 
 [dependencies]
 # Web framework

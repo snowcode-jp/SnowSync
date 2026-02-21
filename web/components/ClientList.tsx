@@ -81,13 +81,13 @@ export function ClientList() {
       });
       const data = await res.json();
       if (res.ok && data.ok) {
-        showToast("success", `マウント成功: ${data.mount_point}`);
+        showToast("success", `Mounted: ${data.mount_point}`);
         fetchMounts();
       } else {
-        showToast("error", data.error || "マウントに失敗しました");
+        showToast("error", data.error || "Failed to mount");
       }
     } catch {
-      showToast("error", "サーバーとの通信に失敗しました");
+      showToast("error", "Failed to communicate with server");
     } finally {
       setMounting((prev) => ({ ...prev, [clientId]: false }));
     }
@@ -105,13 +105,13 @@ export function ClientList() {
       });
       const data = await res.json();
       if (res.ok && data.ok) {
-        showToast("success", "アンマウントしました");
+        showToast("success", "Unmounted successfully");
         fetchMounts();
       } else {
-        showToast("error", data.error || "アンマウントに失敗しました");
+        showToast("error", data.error || "Failed to unmount");
       }
     } catch {
-      showToast("error", "サーバーとの通信に失敗しました");
+      showToast("error", "Failed to communicate with server");
     } finally {
       setMounting((prev) => ({ ...prev, [clientId]: false }));
     }
@@ -124,9 +124,9 @@ export function ClientList() {
           icon={faComputer}
           style={{ fontSize: 32, color: "rgba(126, 184, 216, 0.4)", marginBottom: 12 }}
         />
-        <p style={{ color: "#4a7c9b", fontWeight: 500 }}>接続中のクライアントはありません</p>
+        <p style={{ color: "#4a7c9b", fontWeight: 500 }}>No connected clients</p>
         <p style={{ fontSize: 12, color: "#7eb8d8", marginTop: 6 }}>
-          Windows PCで接続用HTMLを開いてフォルダを共有してください
+          Open the connection HTML on a Windows PC to share a folder
         </p>
       </div>
     );
@@ -134,12 +134,12 @@ export function ClientList() {
 
   return (
     <div>
-      {/* マウントパス設定 */}
+      {/* Mount path setting */}
       <div className="card" style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <FontAwesomeIcon icon={faFolderPlus} style={{ color: "#7eb8d8" }} />
           <label className="form-label" style={{ marginBottom: 0 }}>
-            マウント先フォルダ
+            Mount Destination
           </label>
         </div>
         <input
@@ -152,22 +152,22 @@ export function ClientList() {
         />
       </div>
 
-      {/* クライアント一覧 */}
+      {/* Client list */}
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         <div className="card-header" style={{ padding: "18px 25px", margin: 0, borderRadius: "20px 20px 0 0" }}>
           <div className="card-title">
             <FontAwesomeIcon icon={faUsers} />
-            接続クライアント
+            Connected Clients
           </div>
         </div>
         <div className="table-wrapper">
           <table className="table">
             <thead>
               <tr>
-                <th>状態</th>
-                <th>クライアント</th>
-                <th>フォルダ</th>
-                <th style={{ textAlign: "right" }}>操作</th>
+                <th>Status</th>
+                <th>Client</th>
+                <th>Folder</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -180,11 +180,11 @@ export function ClientList() {
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span className="status-badge status-online">
                           <FontAwesomeIcon icon={faCircle} style={{ fontSize: 6 }} />
-                          接続中
+                          Connected
                         </span>
                         {mounted && (
                           <span className="status-badge status-mounted">
-                            マウント中
+                            Mounted
                           </span>
                         )}
                       </div>
@@ -207,7 +207,7 @@ export function ClientList() {
                       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
                         <Link href={`/browse?client=${client.id}`} className="btn btn-sm">
                           <FontAwesomeIcon icon={faEye} />
-                          閲覧
+                          Browse
                         </Link>
                         {!mounted ? (
                           <button
@@ -220,7 +220,7 @@ export function ClientList() {
                             }}
                           >
                             <FontAwesomeIcon icon={faFolderOpen} />
-                            {mounting[client.id] ? "マウント中..." : "Finderで開く"}
+                            {mounting[client.id] ? "Mounting..." : "Open in Finder"}
                           </button>
                         ) : (
                           <button
@@ -229,7 +229,7 @@ export function ClientList() {
                             className="btn btn-sm btn-danger"
                           >
                             <FontAwesomeIcon icon={faEject} />
-                            アンマウント
+                            Unmount
                           </button>
                         )}
                       </div>

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "author": "雪符しき <info@snowcode.jp> (https://snowcode.jp)",
-  "license": "LicenseRef-SNOWCODE-Proprietary",
+  "license": "MIT",
   "homepage": "https://snowcode.jp",
   "scripts": {
     "dev": "next dev -p 17100 -H 127.0.0.1",

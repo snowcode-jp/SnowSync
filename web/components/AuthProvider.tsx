@@ -93,7 +93,7 @@ function TokenInput({ onSubmit }: { onSubmit: (token: string) => void }) {
           ❄ SnowSync
         </h2>
         <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 24 }}>
-          サーバー起動時に表示された API Token を入力してください
+          Enter the API Token shown when the server started
         </p>
         <input
           type="text"
@@ -130,7 +130,7 @@ function TokenInput({ onSubmit }: { onSubmit: (token: string) => void }) {
             cursor: "pointer",
           }}
         >
-          接続
+          Connect
         </button>
       </div>
     </div>

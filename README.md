@@ -6,6 +6,14 @@
 
 MacからWindowsの複数PCのストレージをマウント・操作できるリモートファイル共有システム
 
+| ログイン | ダッシュボード |
+|:---:|:---:|
+| ![ログイン](docs/assets/01_auth.png) | ![ダッシュボード](docs/assets/02_dashboard.png) |
+
+| 接続 | ファイルブラウザ |
+|:---:|:---:|
+| ![接続](docs/assets/03_connect.png) | ![ファイルブラウザ](docs/assets/04_browse.png) |
+
 ## 概要
 
 SnowSyncは、LAN内のWindows PCの共有フォルダをMacからWebDAV経由でマウントし、Finderやブラウザから操作できるシステムです。
@@ -140,7 +148,21 @@ bash scripts/dev.sh
 | WebDAV (HTTP) | http://localhost:17200/webdav/\<client_id\>/ |
 | WebDAV (HTTPS) | https://localhost:17201/webdav/\<client_id\>/ |
 
-### 3. Windows PCの接続
+起動時にターミナルに **API Token** が表示されます:
+
+```
+  API Token: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+このトークンをコピーしてください。ダッシュボードへのログインに使用します。
+
+### 3. ダッシュボードにログイン
+
+1. ブラウザで `http://localhost:17100` を開く
+2. ターミナルに表示された API Token を貼り付け
+3. **Connect** をクリック
+
+### 4. Windows PCの接続
 
 1. Windows側のChromeまたはEdgeで `http://<Mac IP>:17200/` にアクセス
 2. 表示されたページから **SnowSync-Connect.html** をダウンロード
