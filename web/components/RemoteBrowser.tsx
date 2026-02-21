@@ -24,6 +24,7 @@ import {
   faCircleExclamation,
 } from "@fortawesome/free-solid-svg-icons";
 import { useToast } from "@/components/Toast";
+import { useAuth } from "@/components/AuthProvider";
 
 interface RemoteBrowserProps {
   clientId: string;
@@ -51,10 +52,10 @@ function formatDate(iso: string): string {
   });
 }
 
-async function relayCommand(clientId: string, cmd: Record<string, unknown>) {
+async function relayCommand(clientId: string, cmd: Record<string, unknown>, authHeaders: () => Record<string, string>) {
   const res = await fetch(`/api/relay/${clientId}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(cmd),
   });
   const data = await res.json();
@@ -69,6 +70,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
   const [error, setError] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
   const { showToast } = useToast();
+  const { authHeaders } = useAuth();
 
   const pathStr = "/" + currentPath.join("/");
 
@@ -79,7 +81,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
       const data = await relayCommand(clientId, {
         type: "readdir",
         path: pathStr,
-      });
+      }, authHeaders);
       setFiles(data as FileEntry[]);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "読み込みに失敗しました");
@@ -107,7 +109,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
       const result = (await relayCommand(clientId, {
         type: "readFile",
         path: "/" + filePath,
-      })) as { data: string; name: string; type: string };
+      }, authHeaders)) as { data: string; name: string; type: string };
 
       const binary = atob(result.data);
       const bytes = new Uint8Array(binary.length);
@@ -151,7 +153,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
             type: "writeFile",
             path: "/" + filePath,
             data: btoa(binary),
-          });
+          }, authHeaders);
         } catch (err: unknown) {
           setActionMsg(null);
           showToast("error", `アップロード失敗: ${err instanceof Error ? err.message : "エラー"}`);
@@ -173,7 +175,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
       await relayCommand(clientId, {
         type: "mkdir",
         path: "/" + folderPath,
-      });
+      }, authHeaders);
       showToast("success", `フォルダ「${name}」を作成しました`);
       fetchFiles();
     } catch (err: unknown) {
@@ -188,7 +190,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
       await relayCommand(clientId, {
         type: "delete",
         path: "/" + targetPath,
-      });
+      }, authHeaders);
       showToast("success", `「${name}」を削除しました`);
       fetchFiles();
     } catch (err: unknown) {
@@ -206,7 +208,7 @@ export function RemoteBrowser({ clientId }: RemoteBrowserProps) {
         type: "rename",
         oldPath,
         newPath,
-      });
+      }, authHeaders);
       showToast("success", `「${oldName}」→「${newName}」にリネームしました`);
       fetchFiles();
     } catch (err: unknown) {

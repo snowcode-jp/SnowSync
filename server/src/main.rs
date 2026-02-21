@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
     let https_port = port + 1; // 17201
     let bind = config.bind_address.clone();
 
-    let state = AppState::new(port);
+    let state = AppState::new(port, config.allowed_mount_base.clone());
     let app = server::build_router(state.clone());
 
     let local_ip = local_ip_address::local_ip()
@@ -51,6 +51,9 @@ async fn main() -> Result<()> {
     tracing::info!("  API:       http://{}:{}/api/", local_ip, port);
     tracing::info!("  WebDAV:    https://{}:{}/webdav/<client_id>/", local_ip, https_port);
     tracing::info!("===========================================");
+    tracing::info!("");
+    tracing::info!("  API Token: {}", state.api_token);
+    tracing::info!("  Mount base: {}", config.allowed_mount_base);
     tracing::info!("");
     tracing::info!("  Finderマウント: Cmd+K -> https://{}:{}/webdav/<client_id>/", local_ip, https_port);
     tracing::info!("  接続HTML: http://{}:{}/api/connect-html", local_ip, port);

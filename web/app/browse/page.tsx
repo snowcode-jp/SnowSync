@@ -12,6 +12,7 @@ import { RemoteBrowser } from "@/components/RemoteBrowser";
 import type { ConnectedClient } from "@/lib/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolderOpen, faSpinner, faSnowflake } from "@fortawesome/free-solid-svg-icons";
+import { useAuth } from "@/components/AuthProvider";
 
 function BrowseContent() {
   const searchParams = useSearchParams();
@@ -19,10 +20,11 @@ function BrowseContent() {
   const [selected, setSelected] = useState<string | null>(
     searchParams.get("client")
   );
+  const { authHeaders } = useAuth();
 
   useEffect(() => {
     const fetchClients = async () => {
-      const res = await fetch("/api/clients");
+      const res = await fetch("/api/clients", { headers: authHeaders() });
       if (res.ok) {
         const data: ConnectedClient[] = await res.json();
         setClients(data);

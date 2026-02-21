@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from "react";
 import type { ConnectedClient } from "@/lib/types";
+import { useAuth } from "@/components/AuthProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDesktop,
@@ -21,6 +22,7 @@ import {
 export function ServerStatusCard() {
   const [clients, setClients] = useState<ConnectedClient[]>([]);
   const [ip, setIp] = useState("...");
+  const { authHeaders } = useAuth();
 
   const [webPort, setWebPort] = useState("17100");
   const [rustPort, setRustPort] = useState("17200");
@@ -34,7 +36,7 @@ export function ServerStatusCard() {
     setRustPort(rp);
 
     const fetchClients = async () => {
-      const res = await fetch("/api/clients");
+      const res = await fetch("/api/clients", { headers: authHeaders() });
       if (res.ok) setClients(await res.json());
     };
     fetchClients();
