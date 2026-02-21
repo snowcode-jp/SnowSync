@@ -18,7 +18,7 @@ export default function DashboardPage() {
         <h1 className="page-title">
           <FontAwesomeIcon icon={faSnowflake} style={{ color: "#7eb8d8", fontSize: 22 }} />
           <FontAwesomeIcon icon={faGaugeHigh} style={{ color: "#7eb8d8", fontSize: 22 }} />
-          ダッシュボード
+          Dashboard
         </h1>
       </div>
 

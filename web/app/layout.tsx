@@ -15,7 +15,7 @@ config.autoAddCss = false;
 
 export const metadata: Metadata = {
   title: "SnowSync",
-  description: "Windows PCのフォルダをMacからリモート操作",
+  description: "Access Windows PC folders remotely from Mac",
 };
 
 export default function RootLayout({
@@ -24,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <Providers>
           <div style={{ display: "flex", minHeight: "100vh", position: "relative", zIndex: 1 }}>
             <Sidebar />

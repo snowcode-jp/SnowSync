@@ -4,11 +4,14 @@
 // https://snowcode.jp
 // 問い合わせ: info@snowcode.jp
 
-use axum::extract::Query;
+use axum::extract::{Query, State};
 use axum::http::header;
 use axum::http::HeaderMap;
 use axum::response::{Html, IntoResponse};
 use serde::Deserialize;
+use std::sync::Arc;
+
+use crate::state::AppState;
 
 #[derive(Deserialize)]
 pub struct ConnectParams {
@@ -17,7 +20,7 @@ pub struct ConnectParams {
 }
 
 /// GET /api/connect-html?ip=...&port=...
-/// Downloads the standalone connect HTML file with IP pre-filled.
+/// Downloads the standalone connect HTML file with IP pre-filled and auth token embedded.
 /// If no ip param, uses the Host header (= the IP the client used to reach this server).
 fn extract_host_ip(headers: &HeaderMap) -> String {
     headers
@@ -36,13 +39,24 @@ fn extract_host_port(headers: &HeaderMap) -> u16 {
         .unwrap_or(17200)
 }
 
+/// Escape a string for safe embedding inside an HTML attribute value.
+fn html_escape(s: &str) -> String {
+    s.replace('&', "&amp;")
+        .replace('"', "&quot;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('\'', "&#x27;")
+}
+
 pub async fn connect_html(
+    State(state): State<Arc<AppState>>,
     headers: HeaderMap,
     Query(params): Query<ConnectParams>,
 ) -> impl IntoResponse {
-    let ip = params.ip.unwrap_or_else(|| extract_host_ip(&headers));
+    let ip = html_escape(&params.ip.unwrap_or_else(|| extract_host_ip(&headers)));
     let port = params.port.unwrap_or_else(|| extract_host_port(&headers));
-    let html = generate_connect_html(&ip, port);
+    let token = &state.api_token;
+    let html = generate_connect_html(&ip, port, token);
 
     (
         [
@@ -203,7 +217,7 @@ fn generate_download_page(server_ip: &str, port: u16) -> String {
 </html>"##, server_ip = server_ip, port = port)
 }
 
-fn generate_connect_html(server_ip: &str, port: u16) -> String {
+fn generate_connect_html(server_ip: &str, port: u16, api_token: &str) -> String {
     format!(r##"<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -689,6 +703,7 @@ function connectWS(serverIp) {{
       type: 'register',
       name: pcName,
       folderName: folderName,
+      token: '{api_token}',
     }}));
   }};
   ws.onmessage = async (event) => {{
@@ -740,5 +755,5 @@ function handleDisconnect() {{
 }}
 </script>
 </body>
-</html>"##, server_ip = server_ip, port = port)
+</html>"##, server_ip = server_ip, port = port, api_token = api_token)
 }

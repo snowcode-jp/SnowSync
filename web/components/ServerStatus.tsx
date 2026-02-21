@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from "react";
 import type { ConnectedClient } from "@/lib/types";
+import { useAuth } from "@/components/AuthProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDesktop,
@@ -21,6 +22,7 @@ import {
 export function ServerStatusCard() {
   const [clients, setClients] = useState<ConnectedClient[]>([]);
   const [ip, setIp] = useState("...");
+  const { authHeaders } = useAuth();
 
   const [webPort, setWebPort] = useState("17100");
   const [rustPort, setRustPort] = useState("17200");
@@ -34,7 +36,7 @@ export function ServerStatusCard() {
     setRustPort(rp);
 
     const fetchClients = async () => {
-      const res = await fetch("/api/clients");
+      const res = await fetch("/api/clients", { headers: authHeaders() });
       if (res.ok) setClients(await res.json());
     };
     fetchClients();
@@ -47,28 +49,28 @@ export function ServerStatusCard() {
   const cards = [
     {
       icon: faDesktop,
-      label: "管理画面",
+      label: "Dashboard",
       value: `http://${ip}:${webPort}`,
     },
     {
       icon: faServer,
-      label: "中継サーバー",
+      label: "Relay Server",
       value: `ws://${ip}:${rustPort}/ws`,
     },
     {
       icon: faNetworkWired,
-      label: "接続URL (Windows)",
+      label: "Connect URL (Windows)",
       value: `http://${ip}:${webPort}/connect`,
     },
     {
       icon: faHardDrive,
-      label: "WebDAVマウント",
+      label: "WebDAV Mount",
       value: `https://${ip}:${httpsPort}/webdav/...`,
     },
     {
       icon: faUsers,
-      label: "接続クライアント数",
-      value: `${clients.length} 台`,
+      label: "Connected Clients",
+      value: `${clients.length}`,
     },
   ];
 
@@ -76,7 +78,7 @@ export function ServerStatusCard() {
     <div className="stats-grid">
       {cards.map((card) => (
         <div key={card.label} className="stat-card">
-          {/* 雪結晶ウォーターマーク */}
+          {/* Snowflake watermark */}
           <div
             style={{
               position: "absolute",
@@ -91,10 +93,10 @@ export function ServerStatusCard() {
           <div className="stat-icon">
             <FontAwesomeIcon icon={card.icon} />
           </div>
-          <div className="stat-value" style={{ fontSize: card.label === "接続クライアント数" ? 36 : 18 }}>
-            {card.label === "接続クライアント数" ? card.value : ""}
+          <div className="stat-value" style={{ fontSize: card.label === "Connected Clients" ? 36 : 18 }}>
+            {card.label === "Connected Clients" ? card.value : ""}
           </div>
-          {card.label !== "接続クライアント数" && (
+          {card.label !== "Connected Clients" && (
             <p
               style={{
                 fontSize: 12,

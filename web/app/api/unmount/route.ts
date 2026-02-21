@@ -9,11 +9,12 @@ import { NextRequest, NextResponse } from "next/server";
 const RUST_SERVER = process.env.RUST_SERVER_URL ?? "http://localhost:17200";
 
 export async function POST(req: NextRequest) {
+  const authHeader = req.headers.get("Authorization") || "";
   const body = await req.json();
   try {
     const res = await fetch(`${RUST_SERVER}/api/unmount`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: authHeader },
       body: JSON.stringify(body),
     });
     const data = await res.json();

@@ -34,6 +34,36 @@ fn expand_tilde(path: &str) -> String {
     path.to_string()
 }
 
+/// Check if path is safe (no traversal, within allowed base)
+fn validate_mount_path(path: &str, allowed_base: &str) -> Result<String, String> {
+    // Reject paths containing ".."
+    if path.contains("..") {
+        return Err("Path must not contain '..'".to_string());
+    }
+
+    let expanded = expand_tilde(path);
+    let allowed_expanded = expand_tilde(allowed_base);
+
+    // Normalize: ensure both end consistently
+    let expanded_clean = expanded.trim_end_matches('/');
+    let allowed_clean = allowed_expanded.trim_end_matches('/');
+
+    // Must be under allowed base
+    if !expanded_clean.starts_with(allowed_clean) {
+        return Err(format!(
+            "Mount path must be under '{}' (got '{}')",
+            allowed_base, path
+        ));
+    }
+
+    Ok(expanded)
+}
+
+/// Validate that a string looks like a UUID (8-4-4-4-12 hex)
+fn is_valid_uuid(s: &str) -> bool {
+    uuid::Uuid::parse_str(s).is_ok()
+}
+
 /// POST /api/mount
 /// Body: {"client_id": "xxx", "mount_path": "~/Public/mount"}
 /// Mounts the WebDAV share. Uses 127.0.0.1 HTTP (port 17200) which bypasses
@@ -43,7 +73,26 @@ pub async fn mount_webdav(
     Json(body): Json<MountRequest>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     let client_id = &body.client_id;
-    let base_mount_path = &expand_tilde(&body.mount_path);
+
+    // Validate client_id is UUID format
+    if !is_valid_uuid(client_id) {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid client_id format"})),
+        ));
+    }
+
+    // Validate mount path is under allowed base directory
+    let base_mount_path = match validate_mount_path(&body.mount_path, &state.allowed_mount_base) {
+        Ok(path) => path,
+        Err(e) => {
+            return Err((
+                StatusCode::FORBIDDEN,
+                Json(json!({"error": e})),
+            ));
+        }
+    };
+    let base_mount_path = &base_mount_path;
 
     // Check client exists
     {
@@ -226,9 +275,34 @@ async fn find_webdav_mount(client_id: &str) -> Option<String> {
 /// POST /api/unmount
 /// Body: {"mount_path": "/Users/xxx/Public/mount/ljc-xxx"}
 pub async fn unmount_webdav(
+    State(state): State<Arc<AppState>>,
     Json(body): Json<UnmountRequest>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     let mount_path = &body.mount_path;
+
+    // Validate: path must contain "ljc-" prefix (our mount points)
+    if !mount_path.contains("/ljc-") {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(json!({"error": "Can only unmount SnowSync mount points (ljc-*)"})),
+        ));
+    }
+
+    // Validate: path must be under allowed mount base
+    if let Err(e) = validate_mount_path(mount_path, &state.allowed_mount_base) {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(json!({"error": e})),
+        ));
+    }
+
+    // Reject path traversal
+    if mount_path.contains("..") {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid path"})),
+        ));
+    }
 
     tracing::info!("Unmounting: {}", mount_path);
 

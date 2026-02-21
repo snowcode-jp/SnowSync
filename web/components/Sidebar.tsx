@@ -18,9 +18,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const navItems = [
-  { href: "/", label: "ダッシュボード", icon: faGaugeHigh },
-  { href: "/browse", label: "ファイル閲覧", icon: faFolderOpen },
-  { href: "/connect", label: "接続", icon: faPlug },
+  { href: "/", label: "Dashboard", icon: faGaugeHigh },
+  { href: "/browse", label: "File Browser", icon: faFolderOpen },
+  { href: "/connect", label: "Connect", icon: faPlug },
 ];
 
 export function Sidebar() {
@@ -87,7 +87,7 @@ export function Sidebar() {
             zIndex: 1,
           }}
         >
-          管理ダッシュボード
+          Admin Dashboard
         </p>
       </div>
 
@@ -113,7 +113,7 @@ export function Sidebar() {
             }}
           >
             <FontAwesomeIcon icon={faSnowflake} style={{ fontSize: 10 }} />
-            メイン
+            Main
           </div>
           {navItems.map((item) => {
             const isActive =
@@ -165,7 +165,7 @@ export function Sidebar() {
       >
         <p style={{ fontSize: 13, color: "#5a9fc8", fontWeight: 500 }}>
           <FontAwesomeIcon icon={faSnowflake} style={{ marginRight: 8, fontSize: 12 }} />
-          v1.0 - LAN専用
+          v1.0 - LAN Only
         </p>
       </div>
     </aside>

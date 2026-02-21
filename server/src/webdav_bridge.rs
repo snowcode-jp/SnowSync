@@ -640,10 +640,10 @@ pub async fn webdav_handler(state: Arc<AppState>, req: Request) -> Response<Body
     // Remove any trailing slash from client_id
     let client_id = client_id.trim_end_matches('/');
 
-    if client_id.is_empty() {
+    if client_id.is_empty() || uuid::Uuid::parse_str(client_id).is_err() {
         return Response::builder()
             .status(404)
-            .body(Body::from("No client specified"))
+            .body(Body::from("Invalid client ID"))
             .unwrap();
     }
 

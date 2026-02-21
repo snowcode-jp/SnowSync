@@ -27,7 +27,7 @@ export default function ConnectPage() {
   const handleDownload = async () => {
     try {
       const res = await fetch(`/api/connect-html?ip=${ip}`);
-      if (!res.ok) throw new Error("サーバーに接続できません");
+      if (!res.ok) throw new Error("Cannot connect to server");
       const html = await res.text();
       const blob = new Blob([html], { type: "text/html" });
       const a = document.createElement("a");
@@ -36,7 +36,7 @@ export default function ConnectPage() {
       a.click();
       URL.revokeObjectURL(a.href);
     } catch {
-      alert("サーバーに接続できません。Rustサーバーが起動しているか確認してください。");
+      alert("Cannot connect to server. Please check that the Rust server is running.");
     }
   };
 
@@ -47,48 +47,48 @@ export default function ConnectPage() {
         <h1 className="page-title">
           <FontAwesomeIcon icon={faSnowflake} style={{ color: "#7eb8d8", fontSize: 22 }} />
           <FontAwesomeIcon icon={faPlug} style={{ color: "#7eb8d8", fontSize: 22 }} />
-          Windows PCから接続
+          Connect from Windows PC
         </h1>
       </div>
 
-      {/* メインカード */}
+      {/* Main card */}
       <div className="card">
-        {/* ダウンロードセクション */}
+        {/* Download section */}
         <div className="card-header">
           <div className="card-title">
             <FontAwesomeIcon icon={faDownload} />
-            接続用HTMLをダウンロード
+            Download Connection HTML
           </div>
         </div>
         <p style={{ fontSize: 14, color: "#4a6b7c", marginBottom: 20, lineHeight: 1.8 }}>
-          以下のボタンで接続用HTMLをダウンロードし、Windows PCの
-          <strong style={{ color: "#4a7c9b" }}> Chrome </strong>または
-          <strong style={{ color: "#4a7c9b" }}> Edge </strong>で開いてください。
-          MacサーバーのIPアドレス（
+          Download the connection HTML using the button below and open it in
+          <strong style={{ color: "#4a7c9b" }}> Chrome </strong>or
+          <strong style={{ color: "#4a7c9b" }}> Edge </strong>on your Windows PC.
+          The Mac server IP address (
           <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}>{ip}</code>
-          ）が自動で埋め込まれます。
+          ) is automatically embedded.
         </p>
         <button onClick={handleDownload} className="btn">
           <FontAwesomeIcon icon={faDownload} />
-          接続HTML をダウンロード
+          Download Connection HTML
         </button>
       </div>
 
-      {/* 使い方カード */}
+      {/* How to use card */}
       <div className="card">
         <div className="card-header">
           <div className="card-title">
             <FontAwesomeIcon icon={faListOl} />
-            使い方
+            How to Use
           </div>
         </div>
         <ol style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {[
-            <>上のボタンで <code style={{ color: "#5a9fc8", fontFamily: "monospace" }}>ljc-connect.html</code> をダウンロード</>,
-            <>そのHTMLファイルをWindows PCにコピー（USB・メール・共有フォルダなど）</>,
-            <>Windows PCでChrome/Edgeを開き、HTMLファイルをダブルクリックで開く</>,
-            <>「フォルダを選択して接続」をクリックし、共有したいフォルダを選択</>,
-            <>ブラウザタブを<strong style={{ color: "#4a7c9b" }}>開いたまま</strong>にする（閉じると切断されます）</>,
+            <>Download <code style={{ color: "#5a9fc8", fontFamily: "monospace" }}>ljc-connect.html</code> using the button above</>,
+            <>Copy the HTML file to your Windows PC (via USB, email, shared folder, etc.)</>,
+            <>Open Chrome/Edge on Windows PC and double-click the HTML file</>,
+            <>Click &quot;Select folder to connect&quot; and choose the folder to share</>,
+            <>Keep the browser tab <strong style={{ color: "#4a7c9b" }}>open</strong> (closing it will disconnect)</>,
           ].map((text, i) => (
             <li
               key={i}
@@ -123,31 +123,31 @@ export default function ConnectPage() {
         </ol>
       </div>
 
-      {/* なぜHTMLファイルが必要？ */}
+      {/* Why is the HTML file needed? */}
       <div className="card">
         <div className="card-header">
           <div className="card-title">
             <FontAwesomeIcon icon={faCircleQuestion} />
-            なぜHTMLファイルが必要？
+            Why is the HTML file needed?
           </div>
         </div>
         <p style={{ fontSize: 14, color: "#4a6b7c", lineHeight: 1.8 }}>
-          File System Access APIはセキュリティ上、
-          <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}>https://</code> または
-          <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}> file://</code> でしか動作しません。
-          ローカルネットワークの
-          <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}> http://</code> では使えないため、
-          HTMLファイルをダウンロードして
-          <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}> file://</code> で開く方式を採用しています。
+          For security reasons, the File System Access API only works on
+          <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}> https://</code> or
+          <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}> file://</code> protocols.
+          It cannot be used over
+          <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}> http://</code> on a local network,
+          so the HTML file must be downloaded and opened via
+          <code style={{ color: "#5a9fc8", fontFamily: "monospace", fontWeight: 600 }}> file://</code>.
         </p>
       </div>
 
-      {/* 注意 */}
+      {/* Note */}
       <div className="alert alert-warning">
         <FontAwesomeIcon icon={faTriangleExclamation} />
         <span>
-          Windows 2台以上の接続も可能です。各PCでそれぞれHTMLを開いてフォルダを共有してください。
-          Mac側のダッシュボードで全クライアントを管理できます。
+          Multiple Windows PCs can connect simultaneously. Open the HTML file on each PC and share folders.
+          All clients can be managed from the Mac dashboard.
         </span>
       </div>
     </div>
